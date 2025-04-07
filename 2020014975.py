@@ -1,6 +1,7 @@
 import sys
+from collections import Counter
 
-minSupport = sys.argv[1]
+minSupport = int(sys.argv[1])
 inputFileName = sys.argv[2]
 outputFileName = sys.argv[3]
 
@@ -16,5 +17,27 @@ while True:
     line = line.rstrip("\n")        # line의 끝에 붙어있는 \n 제거 
     DB.append(line.split("\t"))     # list DB에 transactions이 2차원 리스트 형식으로 저장
     
+
+candidate = {}
+frequent = {}
+frequentItemsets = []
+
+
+# Initially, size가 1인 frequent itemsets을 구하기 위해 DB를 Scan
+flat = [item for sublist in DB for item in sublist]
+counter = Counter(flat)
+for key in sorted(counter):
+    candidate[key] = round(counter[key]/len(DB) * 100, 2)
+#print(Candidate)
+
+for key,value in candidate.items():
+    if value >= minSupport:
+        frequent[key] = value
+
+print(candidate)
+print(frequent)
+
+
+
 
 
