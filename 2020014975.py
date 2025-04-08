@@ -1,5 +1,7 @@
 import sys
 from collections import Counter
+from itertools import combinations
+
 
 minSupport = int(sys.argv[1])
 inputFileName = sys.argv[2]
@@ -36,8 +38,22 @@ for key,value in candidate.items():
 
 print(candidate)
 print(frequent)
+print(DB)
+
+
+def count(itemset: tuple, DB: list):
+    count = 0
+    for i in len(DB):
+        if all(item in DB for item in itemset):
+            count+=1
+    return count
 
 
 
 
-
+#while True:
+pairs = list(combinations(frequent.keys(), 2))
+print(pairs)
+candidate = {}
+for pair in pairs:
+    candidate[pair] = 0
