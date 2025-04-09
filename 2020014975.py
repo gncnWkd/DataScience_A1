@@ -2,6 +2,12 @@ import sys
 from collections import Counter
 from itertools import combinations
 
+def count(itemset: tuple, DB: list):
+    count = 0
+    for i in DB:
+        if all(item in i for item in itemset):
+            count+=1
+    return count
 
 minSupport = int(sys.argv[1])
 inputFileName = sys.argv[2]
@@ -32,28 +38,40 @@ for key in sorted(counter):
     candidate[key] = round(counter[key]/len(DB) * 100, 2)
 #print(Candidate)
 
+
 for key,value in candidate.items():
     if value >= minSupport:
         frequent[key] = value
 
-print(candidate)
-print(frequent)
-print(DB)
+print("DB = ", DB)
+print("first candidate = ", candidate)
+print("first frequent = ", frequent)
 
 
-def count(itemset: tuple, DB: list):
-    count = 0
-    for i in len(DB):
-        if all(item in DB for item in itemset):
-            count+=1
-    return count
+while True:
+    n = 2
+
+    # frequent itemset(크기 n)에 있는 (n-1)개의 item이 공유되면, 두 itemset을 self-join한다
+    # self join한 크기 (n+1)의 itemsets에서 크기가 n인 부분집합이 모두 frequent itemset(크기 n) 안에 있으면 candidate가 됨
+    
 
 
 
 
-#while True:
+
+
+#pruning before generating candidate
+
+#generate candidate itemset
 pairs = list(combinations(frequent.keys(), 2))
-print(pairs)
 candidate = {}
 for pair in pairs:
-    candidate[pair] = 0
+    candidate[pair] = round(count(pair, DB)/len(DB)*100, 2)
+print("secend candidate = ", candidate)
+
+#pruning after generating candidate
+frequent = {}
+for key,value in candidate.items():
+    if value >= minSupport:
+        frequent[key] = value
+print("second frequent = ",  frequent)
