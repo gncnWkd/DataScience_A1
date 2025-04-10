@@ -1,13 +1,17 @@
 import sys
-from collections import Counter
-from itertools import combinations
+from itertools import combinations, chain
 
-def count_DB(itemset: tuple, DB: list):   #candidate에 있는 itemset이 DB에 몇 개 있는지 count
+
+def count_DB(itemset, DB: list):   # candidate에 있는 itemset이 DB에 몇 개 있는지 count
     count = 0
     for i in DB:
         if all(item in i for item in itemset):
             count+=1
     return count
+
+def getSubset(itemset: tuple):    # itemset의 자기 자신을 제외한 subset 리스트를 반환
+    subsets_tuple = list(chain.from_iterable(combinations(itemset, r) for r in range(1, len(itemset))))
+    return [set(c) for c in subsets_tuple]
 
 minSupport = int(sys.argv[1])
 inputFileName = sys.argv[2]
@@ -41,15 +45,8 @@ for item in candidate:
     if temp >= minSupport:
         frequent[item] = temp
 
-print("DB = ", DB)
-print("first candidate = ", candidate)
-print("first frequent = ", frequent)
-
-
-
 while True:
     n = len(list(frequent.keys())[0])
-    print("n = ", n)
     candidate.clear()
 
     # Generate candidate itemsets fo length (n+1) from frequent itemsets of length (n)
@@ -63,42 +60,31 @@ while True:
                 # self join한 크기 (n+1)의 itemsets에서 크기가 n인 부분집합이 모두 frequent itemset(크기 n) 안에 있으면 candidate가 됨
                 if all(tuple(sorted(sub)) in list(frequent.keys()) for sub in subsets): 
                        candidate.add(candidateItem)
-
-    print(candidate)
     
     # Test the candidates against DB
     frequent.clear()
     for i in candidate:
         temp = round(count_DB(i, DB)/len(DB)*100, 2)
         if temp >= minSupport:
-            frequent[i] = temp
-            
-    print(frequent)
+            frequent[i] = temp    
     
-    
-    if len(candidate) == 0 or frequent == {}:
+    # Terminate when no frequent or candidate set can be generated
+    if len(candidate) == 0 or len(frequent) == 0:
         break
-
     
+    for i in frequent:
+        frequentItemsets.append(set(i))    
 
+for itemset in frequentItemsets:
+    subsets = getSubset(itemset)
 
+    for base_item_set in subsets:
+        associative_item_set = itemset - base_item_set
+        support_itemset = round(count_DB(itemset, DB)/len(DB)*100, 2)
+        support_base_item_set = round(count_DB(base_item_set, DB)/len(DB)*100, 2)
+        if support_base_item_set == 0:
+            continue
+        confidence = round(support_itemset/support_base_item_set*100, 2)
 
-
-
-
-'''
-#pruning before generating candidate
-
-#generate candidate itemset
-pairs = list(combinations(frequent.keys(), 2))
-candidate = {}
-for pair in pairs:
-    candidate[pair] = round(count_DB(pair, DB)/len(DB)*100, 2)
-print("secend candidate = ", candidate)
-
-#pruning after generating candidate
-frequent = {}
-for key,value in candidate.items():
-    if value >= minSupport:
-        frequent[key] = value
-print("second frequent = ",  frequent)'''
+        data = str(base_item_set) + "\t" + str(associative_item_set) + "\t" + f"{support_itemset:.2f}" + "\t" + f"{confidence:.2f}" + "\n"
+        outputFile.write(data)
