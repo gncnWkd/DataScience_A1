@@ -72,9 +72,11 @@ while True:
     if len(candidate) == 0 or len(frequent) == 0:
         break
     
+    # frequentItemsets에 길이 2 이상의 frequent itemset들을 모두 저장
     for i in frequent:
         frequentItemsets.append(set(i))    
 
+# output 파일에 item_set, associative_item_set, support,confidence 출력
 for itemset in frequentItemsets:
     subsets = getSubset(itemset)
 
