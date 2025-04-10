@@ -45,6 +45,9 @@ for item in candidate:
     if temp >= minSupport:
         frequent[item] = temp
 
+if len(frequent)==0:
+    quit()
+
 while True:
     n = len(list(frequent.keys())[0])
     candidate.clear()
